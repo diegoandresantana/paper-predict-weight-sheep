@@ -38,17 +38,17 @@ class MinorMajorAxis():
                 orientation = props.orientation
                 #print("Major: ")
                 labels.append("Major_axis")
-                print(props.major_axis_length)
+                #print(props.major_axis_length)
                 values.append(props.major_axis_length)
-                print("Minorajor: ")	
+                #print("Minorajor: ")	
                 labels.append("Minor_axis")
                 values.append(props.minor_axis_length)
-                print(props.minor_axis_length)	
+                #print(props.minor_axis_length)	
                
-                x1 = x0 + math.cos(orientation) * 0.5 * props.major_axis_length
-                y1 = y0 - math.sin(orientation) * 0.5 * props.major_axis_length
-                x2 = x0 - math.sin(orientation) * 0.5 * props.minor_axis_length
-                y2 = y0 - math.cos(orientation) * 0.5 * props.minor_axis_length
+                x1 = x0 + math.cos(orientation) * 0.5 * props.minor_axis_length
+                y1 = y0 - math.sin(orientation) * 0.5 * props.minor_axis_length
+                x2 = x0 - math.sin(orientation) * 0.5 * props.major_axis_length
+                y2 = y0 - math.cos(orientation) * 0.5 * props.major_axis_length
                 
                 ax.imshow(image, cmap=plt.cm.gray)
                 ax.plot((x0, x1), (y0, y1), '-r', linewidth=2.5)
@@ -62,7 +62,7 @@ class MinorMajorAxis():
                 break
             types = ['real'] * len(labels)
             ax.axis((0, width, height, 0))
-            plt.show()
+            #plt.show()
             return labels, types, values
 
 

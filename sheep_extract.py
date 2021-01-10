@@ -74,7 +74,7 @@ def process(folder):
     image=cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) 
     list_image.append(image)
   
-  extractors=[AreaPerimeter,KCURVATURE,HuMoments]
+  extractors=[AreaPerimeter,KCURVATURE,HuMoments,MinorMajorAxis]
   labels=[] # nome dos artributos
   types=[]  # tipos de cada atributo
   values=[] # valores relativos aos atributos
@@ -84,8 +84,8 @@ def process(folder):
     array_name=list_file[i].split('/')
     name_file=array_name[len(array_name)-1]
     weight=int(name_file.split('_')[2])/10   #pega o peso do nome do arquivo e divide por 10
-    id=name_file.split('_')[0]+'_'+name_file.split('_')[1] # baia_ numero da ovelha
-    
+    #id=name_file.split('_')[0]+'_'+name_file.split('_')[1] # baia_ numero da ovelha
+    id=name_file.split('_')[1]+'.'+name_file.split('_')[2] # baia_ numero da ovelha
     kernel = np.ones((5,5), np.uint8)
     image=cv2.dilate(image, kernel,6)
     #horizontal_img = cv2.flip(image, 0 )
@@ -101,9 +101,9 @@ def process(folder):
        #val.append(id)
 
        #identificador
-       #lab.append("sheep_number")
-       #typ.append("string")
-       #val.append(id)
+       lab.append("sheep_number")
+       typ.append("real")
+       val.append(id)
 
        #classes.append(id)
        labels.append(lab)
@@ -125,7 +125,7 @@ def process(folder):
     else:
        lab,typ, val = [list(itertools.chain.from_iterable(ret)) for ret in zip(*([extractor().run(image.copy()) for extractor in extractors]))] 
        val.append(weight)
-       #val.append(id)
+       val.append(id)
        values.append(val)
        #if id in classes:
        #    classe=""
@@ -153,5 +153,5 @@ def process(folder):
 
 if __name__ == "__main__":
   for i in range(8):
-    process("/home/diegopc/Documents/inovisao/testes/fold/f"+str(i+1)+"/train/")
-    process("/home/diegopc/Documents/inovisao/testes/fold/f"+str(i+1)+"/val/")
+    process("/home/diego/Documents/inovisao/paper-predict-weight-sheep/fold/f"+str(i+1)+"/train/")
+    process("/home/diego/Documents/inovisao/paper-predict-weight-sheep/fold/f"+str(i+1)+"/val/")

@@ -103,12 +103,12 @@ class MLSklean():
 
             #columns=['K_80_99','K_0_19','K_20_39','K_40_59','K_60_79','Hu_0','Hu_2','Hu_4','Hu_5','Hu_6','Weight']
             #columns=['Hu_0','Hu_2','Hu_4','Hu_5','Hu_6','Weight']
-            columns=['Weight']
-
+            columns=['Weight','Hu_0','Hu_1','Hu_2','Hu_3','Hu_4','Hu_5','Hu_6','K_0_19','K_20_39','K_40_59','K_60_79','K_80_99','K_80_99','K_100_119','K_120_139','K_140_159','K_160_180','AspectRatio','Extent','Solidity','EquivalentDiameter','sheep_number']
             x_train=train.drop(columns, axis=1).copy()
             y_train=train['Weight'].copy()
             x_test=test.drop(columns, axis=1).copy()
             y_test=test['Weight'].copy()
+            z_name=test['sheep_number'].copy()
             #if(fold==1):
                 
                 #sns.set(style="ticks", color_codes=True)
@@ -397,7 +397,7 @@ class MLSklean():
         return adj
 
 if __name__ == "__main__":
-    QTD_FOLDS=4
+    QTD_FOLDS=5
     ml=MLSklean(QTD_FOLDS)
     
     for i in range( QTD_FOLDS):

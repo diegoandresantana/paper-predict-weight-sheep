@@ -6,6 +6,18 @@ import xgboost as xgboost
 from sklearn.svm import SVR
 from scipy.io import arff
 import pandas as pd 
+
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', -1)
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
+def adjust_r2(r2, num_examples, num_features):
+    coef = (num_examples - 1) / (num_examples - num_features - 1) 
+    return 1 - (1 - r2) * coef
 if __name__ == "__main__":
     log_file = open('selection_attributes.txt', 'a') #r ou a
     log_file.write('Experiment:\n')
@@ -45,18 +57,18 @@ if __name__ == "__main__":
     #             subsample=0.6,
     #             seed=300) 
 
-    efs = EFS(lr, n_jobs=16,
-          min_features=2,
+    efs = EFS(lr, n_jobs=12,
+          min_features=10,
           max_features=20,
           scoring= 'r2' ,
-          cv=2)
+          cv=4,print_progress=True)
 
     efs.fit(x, y)
     log_file.write('Best MSE score: %.2f' % efs.best_score_ * (-1))
     log_file.write('\n')
-    log_file.write('Best subset:', efs.best_idx_)
+    log_file.write('Best subset:' + str( efs.best_idx_))
     log_file.write('\n')
-    log_file.write('Best subset (corresponding names):', efs.best_feature_names_)
+    log_file.write('Best subset (corresponding names):'+ str( efs.best_feature_names_))
     log_file.write('\n')
     print('Best MSE score: %.2f' % efs.best_score_ * (-1))
     print('Best subset:', efs.best_idx_)
@@ -64,13 +76,36 @@ if __name__ == "__main__":
 
     
     df = pd.DataFrame.from_dict(efs.get_metric_dict()).T
-    df.sort_values('r2', inplace=True, ascending=False)
+    df.sort_values('avg_score', inplace=True, ascending=False)
     print(df)
 
-    log_file.write(df)
+    log_file.write(str(df))
     log_file.write('\n')
-    log_file.write(efs1.subsets_)   
+    log_file.write(str(efs.subsets_))   
+    log_file.write('\n#########################################################3\n')
+    for i in efs.subsets_:
+        efs.subsets_[i]['adjusted_avg_score'] = (
+            adjust_r2(r2=efs.subsets_[i]['avg_score'],
+                  num_examples=x.shape[0]/10,
+                  num_features=len(efs.subsets_[i]['feature_idx']))
+        )
+ 
 
+
+    for i in efs.subsets_:
+      score = efs.subsets_[i]['adjusted_avg_score']
+      if ( efs.subsets_[i]['adjusted_avg_score'] == score and
+          len(efs.subsets_[i]['feature_idx']) < len(efs.best_idx_) )\
+        or efs.subsets_[i]['adjusted_avg_score'] > score:
+           efs.best_idx_ = efs.subsets_[i]['feature_idx']
+
+    score = -99e10
+    print('Best adjusted R2 score: %.2f' % efs.best_score_ * (-1))
+    print('Best subset:', efs.best_idx_)
+    log_file.write('\n#########################################################3\n')
+    log_file.write('Best adjusted R2 score: ' + str(efs.best_score_ * (-1)))   
+    log_file.write('Best subset:'+ str(efs.best_idx_))  
+    log_file.write('\n#########################################################3\n')
     import matplotlib.pyplot as plt
 
     metric_dict = efs.get_metric_dict()
@@ -78,13 +113,13 @@ if __name__ == "__main__":
     fig = plt.figure()
     k_feat = sorted(metric_dict.keys())
 
-    avg = [metric_dict[k]['r2'] for k in k_feat]
+    avg = [metric_dict[k]['avg_score'] for k in k_feat]
 
     upper, lower = [], []
     for k in k_feat:
-        upper.append(metric_dict[k]['r2'] +
+        upper.append(metric_dict[k]['avg_score'] +
                  metric_dict[k]['std_dev'])
-        lower.append(metric_dict[k]['r2'] -
+        lower.append(metric_dict[k]['avg_score'] -
                  metric_dict[k]['std_dev'])
 
     plt.fill_between(k_feat,
